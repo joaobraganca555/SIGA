@@ -115,8 +115,7 @@ void imprimirCarteiras(Carteira *carteiras, int numCarteiras)
 int main()
 {
     int opcao_principal, opcao_secundaria;
-    const int numCarteiras = 2;
-    Carteira carteiras[numCarteiras];
+    Carteira carteiras[MAX_CARTEIRAS];
 
     do
     {
