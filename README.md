@@ -1,10 +1,10 @@
 # SIGA_Mauricio
 
-TO DO (Nosso)
-- [ ] Menu simples
+## TO DO (Nosso)
+- [x] Menu simples
   - [ ] Não permitir inserir letras (charts)
 
-TO DO (Enunciado)
+## TO DO (Enunciado)
 - [ ] Importar dados de ficheiro de texto
   - [ ] Carteira nova
   - [ ] Atualização dos novos valores dos AtivoFinanceiro
