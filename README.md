@@ -5,8 +5,9 @@
   - [ ] Não permitir inserir letras (charts)
 
 ## TO DO (Enunciado)
-- [ ] Importar dados de ficheiro de texto
-  - [ ] Carteira nova
+- [x] Importar dados de ficheiro de texto
+  - [x] Carteira nova
+  - [x] Importar Ativos Financeiros
   - [ ] Atualização dos novos valores dos AtivoFinanceiro
 - [ ] Compra/Venda de AtivoFinanceiro para determinada Carteira
   - [ ] Programa lista as carteiras existentes com id e nome

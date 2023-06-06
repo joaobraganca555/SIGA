@@ -106,30 +106,35 @@ void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
 }
 
 void lerAtivosFinanceiros(const char *nomeArquivo,
-                          AtivoFinanceiro **ativosFinanceiros,
+                          AtivoFinanceiro *ativosFinanceiros,
                           int *tamanhoArray) {
     FILE *file = fopen(nomeArquivo, "r");
     if (file == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
     }
+
     int i = 0;
-    while (fscanf(file, "%d,%c,%49[^\n]", &((*ativosFinanceiros)[i].id),
-                  &((*ativosFinanceiros)[i].tipo),
-                  (*ativosFinanceiros)[i].nome) == 3) {
+    while (fscanf(file, "%d,%c,%49[^\n]", &ativosFinanceiros[i].id,
+                  &ativosFinanceiros[i].tipo, ativosFinanceiros[i].nome) == 3) {
         i++;
-        if (i >= *tamanhoArray) {
-            *tamanhoArray += 10;  // Aumenta o tamanho do array em 10
-            *ativosFinanceiros = realloc(
-                *ativosFinanceiros, (*tamanhoArray) * sizeof(AtivoFinanceiro));
-            printf('----------------------------------------');
-            printf("Tamanho máximo atingido, a realocar memória...\n");
-            printf('----------------------------------------');
-            if (*ativosFinanceiros == NULL) {
-                printf("Erro ao realocar memória.\n");
-                break;
-            }
+        if (i >= 10) {
+            printf("Tamanho máximo do array de ativos financeiros atingido.\n");
+            break;  // Interrompe a leitura se o array estiver cheio
         }
+        // if (i >= *tamanhoArray) {
+        //     *tamanhoArray += 10;  // Aumenta o tamanho do array em 10
+        //     *ativosFinanceiros = realloc(
+        //         *ativosFinanceiros, (*tamanhoArray) *
+        //         sizeof(AtivoFinanceiro));
+        //     printf('----------------------------------------');
+        //     printf("Tamanho máximo atingido, a realocar memória...\n");
+        //     printf('----------------------------------------');
+        //     if (*ativosFinanceiros == NULL) {
+        //         printf("Erro ao realocar memória.\n");
+        //         break;
+        //     }
+        // }
     }
 
     fclose(file);
@@ -137,8 +142,11 @@ void lerAtivosFinanceiros(const char *nomeArquivo,
     // Imprime os ativos financeiros lidos do arquivo
     printf("Ativos Financeiros:\n");
     for (int j = 0; j < i; j++) {
-        printf("ID: %d, Tipo: %c, Nome: %s\n", (*ativosFinanceiros)[j].id,
-               (*ativosFinanceiros)[j].tipo, (*ativosFinanceiros)[j].nome);
+        printf("ID: %d, Tipo: %c, Nome: %s\n", ativosFinanceiros[j].id,
+               ativosFinanceiros[j].tipo, ativosFinanceiros[j].nome);
+        //     printf("ID: %d, Tipo: %c, Nome: %s\n",
+        //     (*ativosFinanceiros)[j].id,
+        //    (*ativosFinanceiros)[j].tipo, (*ativosFinanceiros)[j].nome);
     }
 }
 
@@ -150,7 +158,9 @@ int main() {
     int numAtivosFinanceiros = 10;
     Carteira carteiras[MAX_CARTEIRAS];
     AtivoCarteira ativosCarteiras[MAX_ATIVOS_CARTEIRA];
-    AtivoFinanceiro *ativosFinanceiros = malloc(10 * sizeof(AtivoFinanceiro));
+    AtivoFinanceiro ativosFinanceiros[numAtivosFinanceiros];
+    // AtivoFinanceiro *ativosFinanceiros = malloc(10 *
+    // sizeof(AtivoFinanceiro));
 
     do {
         printf("Menu Principal:\n");
