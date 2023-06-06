@@ -5,14 +5,24 @@
 
 #include "Lib.h"
 
+
+int pesquisa_ativo_carteira(AtivoCarteira *ativosCarteira, int numAtivosCarteira, int idAtivo) {
+    int i = 0;
+    while (i < numAtivosCarteira && ativosCarteira[i].id != idAtivo)
+        ++i;
+
+    if (i < numAtivosCarteira)
+        return i;
+    else {
+        return -1;
+    }
+}
+
 void lerDadosCarteiras(const char *nomeArquivo,
                        Carteira *carteiras,
-                       AtivoCarteira *ativosCarteira,
-                       int *numCarteiras,
-                       int *numAtivosCarteiras) {
+                       int *numCarteiras) {
 
     FILE *file;
-    AtivoCarteira *tempAtivosCarteira = ativosCarteira;
     Carteira *tempCarteiras = carteiras;
 
     file = fopen(nomeArquivo, "r");
@@ -25,6 +35,11 @@ void lerDadosCarteiras(const char *nomeArquivo,
     while (!feof(file)) {
         char linha[100];
         fgets(linha, sizeof(linha), file);
+
+        if (*numCarteiras == MAX_CARTEIRAS){
+            printf("Limite de &d Carteiras atingido");
+            break;
+        }
 
         // Nova carteira, reinicializar variáveis
         if (linha[0] == '-') {
@@ -42,7 +57,7 @@ void lerDadosCarteiras(const char *nomeArquivo,
         }
 
         // Ler todas os AtivoCarteira desta carteira
-        int *tempListaIdsCarteira = tempCarteiras->ativo_carteira_ids;
+        AtivoCarteira *tempAtivosCarteira = tempCarteiras->ativosCarteira;
         while (!feof(file)) {
             fgets(linha, sizeof(linha), file);
 
@@ -52,17 +67,17 @@ void lerDadosCarteiras(const char *nomeArquivo,
                 break;
             }
 
+            if (tempCarteiras->num_ativo_carteira == MAX_ATIVOS_CARTEIRA){
+                printf("Limite de %d AtivosCarteira atingido para a carteira %d", MAX_ATIVOS_CARTEIRA, tempCarteiras->id);
+                break;
+            }
+
             sscanf(linha, "Id de AtivoFinanceiro %d", &tempAtivosCarteira->id);
             fgets(linha, sizeof(linha), file);
             sscanf(linha, "Quantidade de AtivoFinanceiro %d", &tempAtivosCarteira->quantidade);
 
-            (*numAtivosCarteiras)++;
             (tempCarteiras->num_ativo_carteira)++;
-
-            *tempListaIdsCarteira = tempAtivosCarteira->id;
-
             *tempAtivosCarteira++;
-            *tempListaIdsCarteira++;
         }
     }
     fclose(file);
@@ -70,17 +85,16 @@ void lerDadosCarteiras(const char *nomeArquivo,
 
 void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
     Carteira *tempCarteiras = carteiras;
+
     for (int i = 0; i < numCarteiras; i++, tempCarteiras++) {
         printf("Carteira ID: %d\n", tempCarteiras->id);
         printf("Descrição: %s\n", tempCarteiras->descricao);
 
+        AtivoCarteira *tempAtivosCarteira = tempCarteiras->ativosCarteira;
         printf("Ativos da carteira:\n");
-        for (int j = 0; j < tempCarteiras->num_ativo_carteira; j++) {
-            //Esta a aceder á zero para não dar erro, falta acabar leitura
-            printf("ID de AtivoFinanceiro: %d\n", carteiras->ativo_carteira_ids[0]);
-
-            //Como estamos a usar id's não sabemos a quandidade diretamente, temos de procurar na struct AtivoCarteira atravez do id para ir buscar a quantidade
-//            printf("Quantidade de AtivoFinanceiro: %d\n", carteiras[i].ativo_carteira_ids[j + 1]);
+        for (int j = 0; j < tempCarteiras->num_ativo_carteira; j++, *tempAtivosCarteira++) {
+            printf("ID de AtivoFinanceiro: %d\n", tempAtivosCarteira->id);
+            printf("Quantidade de AtivoFinanceiro: %d\n", tempAtivosCarteira->quantidade);
         }
         printf("\n");
     }
@@ -88,9 +102,8 @@ void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
 
 int main() {
     int opcao_principal, opcao_secundaria;
-    int numCarteiras, numAtivosCarteira = 0;
+    int numCarteiras = 0;
     Carteira carteiras[MAX_CARTEIRAS];
-    AtivoCarteira ativosCarteiras[MAX_ATIVOS_CARTEIRA];
 
     do {
         printf("Menu Principal:\n");
@@ -106,9 +119,7 @@ int main() {
                 printf("Você selecionou a opção 1 do Menu Principal.\n");
                 lerDadosCarteiras("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/carteiras.txt",
                                   carteiras,
-                                  ativosCarteiras,
-                                  &numCarteiras,
-                                  &numAtivosCarteira);
+                                  &numCarteiras);
                 imprimirCarteiras(carteiras, numCarteiras);
                 break;
             case 2:

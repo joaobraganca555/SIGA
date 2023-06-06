@@ -18,13 +18,6 @@ typedef struct {
 
 typedef struct {
     int id;
-    char descricao[100];
-    int ativo_carteira_ids[MAX_ATIVOS_CARTEIRA];
-    int num_ativo_carteira;
-} Carteira;
-
-typedef struct {
-    int id;
     int quantidade;
 } AtivoCarteira;
 
@@ -39,5 +32,12 @@ typedef struct {
     Data data;
     double valor;
 } ValorAtivo;
+
+typedef struct {
+    int id;
+    char descricao[100];
+    AtivoCarteira ativosCarteira[MAX_ATIVOS_CARTEIRA];
+    int num_ativo_carteira;
+} Carteira;
 
 #endif //SIGA_MAURICIO_LIB_H
