@@ -63,7 +63,8 @@ void lerDadosCarteiras(const char *nomeArquivo,
         if (linha[0] == '-') {
             idCarteiraAtual++;
             numAtivosCarteiraAtual = 0;
-            fgets(linha, sizeof(linha), file);
+
+            continue;
         }
 
         // Carteira ID e Descrição
