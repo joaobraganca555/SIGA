@@ -1,14 +1,8 @@
-//
-// Created by Micael Sampaio on 06/06/2023.
-//
+#ifndef SIGA_LIB_H
+#define SIGA_LIB_H
 
-#ifndef SIGA_MAURICIO_LIB_H
-#define SIGA_MAURICIO_LIB_H
-
-// Número máximo de carteiras
-#define MAX_CARTEIRAS 100
-// Número máximo de AtivosCarteira
-#define MAX_ATIVOS_CARTEIRA 50
+#define MAX_CARTEIRAS 100       // numero maximo de carteiras
+#define MAX_ATIVOS_CARTEIRA 50  // numero maximo de AtivosCarteira
 
 typedef struct {
     int dia;
@@ -24,13 +18,13 @@ typedef struct {
 } Carteira;
 
 typedef struct {
-    int id;
+    int id;  // id ativo financeiro
     int quantidade;
 } AtivoCarteira;
 
 typedef struct {
     int id;
-    char tipo[20];
+    char tipo;
     char nome[50];
 } AtivoFinanceiro;
 
@@ -40,4 +34,4 @@ typedef struct {
     double valor;
 } ValorAtivo;
 
-#endif //SIGA_MAURICIO_LIB_H
+#endif  // SIGA_LIB_H
