@@ -3,50 +3,17 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Número máximo de carteiras
-#define MAX_CARTEIRAS 100
-// Número máximo de AtivosCarteira
-#define MAX_ATIVOS_CARTEIRA 50
-
-typedef struct {
-    int dia;
-    int mes;
-    int ano;
-} Data;
-
-typedef struct {
-    int id;
-    char descricao[100];
-    int *ativo_carteira_ids;
-    int num_ativo_carteira;
-} Carteira;
-
-typedef struct {
-    int id;
-    int ativo_financeiro_id;
-    int quantidade;
-} AtivoCarteira;
-
-typedef struct {
-    int id;
-    char tipo[20];
-    char nome[50];
-} AtivoFinanceiro;
-
-typedef struct {
-    int ativo_financeiro_id;
-    Data data;
-    double valor;
-} ValorAtivo;
+#include "Lib.h"
 
 void lerDadosCarteiras(const char *nomeArquivo,
                        Carteira *carteiras,
                        AtivoCarteira *ativosCarteira,
-                       int *numCarteiras) {
+                       int *numCarteiras,
+                       int *numAtivosCarteiras) {
 
     FILE *file;
-    int idCarteiraAtual = 0;
-    int numAtivosCarteiraAtual;
+    AtivoCarteira *tempAtivosCarteira = ativosCarteira;
+    Carteira *tempCarteiras = carteiras;
 
     file = fopen(nomeArquivo, "r");
 
@@ -61,22 +28,21 @@ void lerDadosCarteiras(const char *nomeArquivo,
 
         // Nova carteira, reinicializar variáveis
         if (linha[0] == '-') {
-            idCarteiraAtual++;
-            numAtivosCarteiraAtual = 0;
-
+            *tempCarteiras++;
             continue;
         }
 
         // Carteira ID e Descrição
         if (linha[0] == 'C') {
-            sscanf(linha, "CarteiraId %d", &carteiras[idCarteiraAtual].id);
-            fgets(carteiras[idCarteiraAtual].descricao, sizeof(carteiras[idCarteiraAtual].descricao), file);
+            sscanf(linha, "CarteiraId %d", &tempCarteiras->id);
+            fgets(tempCarteiras->descricao, sizeof(tempCarteiras->descricao), file);
 
-            carteiras[idCarteiraAtual].num_ativo_carteira = 0;
+            tempCarteiras->num_ativo_carteira = 0;
             (*numCarteiras)++;
         }
 
         // Ler todas os AtivoCarteira desta carteira
+        int *tempListaIdsCarteira = tempCarteiras->ativo_carteira_ids;
         while (!feof(file)) {
             fgets(linha, sizeof(linha), file);
 
@@ -85,16 +51,18 @@ void lerDadosCarteiras(const char *nomeArquivo,
                 fseek(file, (long long) -strlen(linha), SEEK_CUR);
                 break;
             }
-            //FALTA CRIAR/INSERIR NA STRUCT ATIVO_CARTEIRA e na lista de IDS, alocar memoria ou definir tamanho??
 
-            int idAtivoFinanceiro = 0;
-            int quantidadeAtivoFinanceiro = 0;
-
-            sscanf(linha, "Id de AtivoFinanceiro %d", &idAtivoFinanceiro);
+            sscanf(linha, "Id de AtivoFinanceiro %d", &tempAtivosCarteira->id);
             fgets(linha, sizeof(linha), file);
-            sscanf(linha, "Quantidade de AtivoFinanceiro %d", &quantidadeAtivoFinanceiro);
+            sscanf(linha, "Quantidade de AtivoFinanceiro %d", &tempAtivosCarteira->quantidade);
 
-            carteiras[idCarteiraAtual].num_ativo_carteira++;
+            (*numAtivosCarteiras)++;
+            (tempCarteiras->num_ativo_carteira)++;
+
+            *tempListaIdsCarteira = tempAtivosCarteira->id;
+
+            *tempAtivosCarteira++;
+            *tempListaIdsCarteira++;
         }
     }
     fclose(file);
@@ -120,7 +88,7 @@ void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
 
 int main() {
     int opcao_principal, opcao_secundaria;
-    int numCarteiras = 0;
+    int numCarteiras, numAtivosCarteira = 0;
     Carteira carteiras[MAX_CARTEIRAS];
     AtivoCarteira ativosCarteiras[MAX_ATIVOS_CARTEIRA];
 
@@ -139,7 +107,8 @@ int main() {
                 lerDadosCarteiras("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/carteiras.txt",
                                   carteiras,
                                   ativosCarteiras,
-                                  &numCarteiras);
+                                  &numCarteiras,
+                                  &numAtivosCarteira);
                 imprimirCarteiras(carteiras, numCarteiras);
                 break;
             case 2:
