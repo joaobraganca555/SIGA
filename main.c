@@ -122,6 +122,9 @@ void lerAtivosFinanceiros(const char *nomeArquivo,
             *tamanhoArray += 10;  // Aumenta o tamanho do array em 10
             *ativosFinanceiros = realloc(
                 *ativosFinanceiros, (*tamanhoArray) * sizeof(AtivoFinanceiro));
+            printf('----------------------------------------');
+            printf("Tamanho máximo atingido, a realocar memória...\n");
+            printf('----------------------------------------');
             if (*ativosFinanceiros == NULL) {
                 printf("Erro ao realocar memória.\n");
                 break;
