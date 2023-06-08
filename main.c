@@ -5,10 +5,11 @@
 
 #include "Lib.h"
 
-int pesquisa_ativo_carteira(AtivoCarteira *ativosCarteira,
-                            int numAtivosCarteira, int idAtivo) {
+
+int pesquisaAtivoCarteira(AtivoCarteira *ativosCarteira, int numAtivosCarteira, int idAtivo) {
     int i = 0;
-    while (i < numAtivosCarteira && ativosCarteira[i].id != idAtivo) ++i;
+    while (i < numAtivosCarteira && ativosCarteira[i].id != idAtivo)
+        ++i;
 
     if (i < numAtivosCarteira)
         return i;
@@ -17,13 +18,65 @@ int pesquisa_ativo_carteira(AtivoCarteira *ativosCarteira,
     }
 }
 
-void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras,
-                       AtivoCarteira *ativosCarteira, int *numCarteiras,
-                       int *numAtivosCarteiras) {
+bool alocaValoresAtivos(ValorAtivo **valoresAtivos, int *maxValoresAtivos, int tam) {
+    *valoresAtivos = (ValorAtivo *) malloc(tam * sizeof(ValorAtivo));
+    if (*valoresAtivos == NULL) {
+        printf("Erro ao alocar memoria para valores ativos\n");
+        return false;
+    } else {
+        *maxValoresAtivos = tam;
+        return true;
+    }
+}
+
+bool realocaValoresAtivos(ValorAtivo **valoresAtivos, int *maxValoresAtivos) {
+    ValorAtivo *temp;
+    temp = (ValorAtivo *) realloc(*valoresAtivos, (*maxValoresAtivos * 2) * sizeof(ValorAtivo));
+
+    if (temp == NULL) {
+        printf("Erro ao realocar memoria para valores ativos\n");
+        return false;
+    } else {
+        *valoresAtivos = temp;
+        *maxValoresAtivos *= 2;
+        return true;
+    }
+}
+
+bool alocaAtivosFinanceiros(AtivoFinanceiro **ativosFinanceiros, int *maxAtivosFinanceiros, int tam) {
+
+    *ativosFinanceiros = (AtivoFinanceiro *) malloc(tam * sizeof(AtivoFinanceiro));
+    if (*ativosFinanceiros == NULL) {
+        printf("Erro ao alocar memoria para Ativos Financeiros\n");
+        return false;
+    } else {
+        *maxAtivosFinanceiros = tam;
+        return true;
+    }
+}
+
+bool realocaAtivosFinanceiros(AtivoFinanceiro **ativosFinanceiro, int *maxAtivosFinanceiros) {
+
+    AtivoFinanceiro *temp;
+    temp = (AtivoFinanceiro *) realloc(*ativosFinanceiro, (*maxAtivosFinanceiros * 2) * sizeof(AtivoFinanceiro));
+
+    if (temp == NULL) {
+        printf("Erro ao realocar memoria para ativos financeiros\n");
+        return false;
+    } else {
+        *ativosFinanceiro = temp;
+        *maxAtivosFinanceiros *= 2;
+        return true;
+    }
+}
+
+
+void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCarteiras) {
     FILE *file;
     Carteira *tempCarteiras = carteiras;
 
     file = fopen(nomeArquivo, "r");
+
 
     if (file == NULL) {
         perror("Erro ao abrir o file");
@@ -35,7 +88,7 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras,
         fgets(linha, sizeof(linha), file);
 
         if (*numCarteiras == MAX_CARTEIRAS) {
-            printf("Limite de &d Carteiras atingido");
+            printf("Limite de %d Carteiras atingido", MAX_CARTEIRAS);
             break;
         }
 
@@ -51,7 +104,7 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras,
             fgets(tempCarteiras->descricao, sizeof(tempCarteiras->descricao),
                   file);
 
-            tempCarteiras->num_ativo_carteira = 0;
+            tempCarteiras->numAtivosCarteira = 0;
             (*numCarteiras)++;
         }
 
@@ -63,14 +116,12 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras,
             // se encontrar --- recua no ponteiro do ficheiro para a linha
             // anterior
             if (linha[0] == '-') {
-                fseek(file, (long long)-strlen(linha), SEEK_CUR);
+                fseek(file, (long long) -strlen(linha), SEEK_CUR);
                 break;
             }
 
-            if (tempCarteiras->num_ativo_carteira == MAX_ATIVOS_CARTEIRA) {
-                printf(
-                    "Limite de %d AtivosCarteira atingido para a carteira %d",
-                    MAX_ATIVOS_CARTEIRA, tempCarteiras->id);
+            if (tempCarteiras->numAtivosCarteira == MAX_ATIVOS_CARTEIRA) {
+                printf("Limite de %d AtivosCarteira atingido para a carteira %d", MAX_ATIVOS_CARTEIRA, tempCarteiras->id);
                 break;
             }
 
@@ -79,7 +130,7 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras,
             sscanf(linha, "Quantidade de AtivoFinanceiro %d",
                    &tempAtivosCarteira->quantidade);
 
-            (tempCarteiras->num_ativo_carteira)++;
+            (tempCarteiras->numAtivosCarteira)++;
             *tempAtivosCarteira++;
         }
     }
@@ -95,19 +146,19 @@ void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
 
         AtivoCarteira *tempAtivosCarteira = tempCarteiras->ativosCarteira;
         printf("Ativos da carteira:\n");
-        for (int j = 0; j < tempCarteiras->num_ativo_carteira;
+        for (int j = 0; j < tempCarteiras->numAtivosCarteira;
              j++, *tempAtivosCarteira++) {
             printf("ID de AtivoFinanceiro: %d\n", tempAtivosCarteira->id);
-            printf("Quantidade de AtivoFinanceiro: %d\n",
-                   tempAtivosCarteira->quantidade);
+            printf("Quantidade de AtivoFinanceiro: %d\n", tempAtivosCarteira->quantidade);
         }
         printf("\n");
     }
 }
 
 void lerAtivosFinanceiros(const char *nomeArquivo,
-                          AtivoFinanceiro *ativosFinanceiros,
-                          int *tamanhoArray) {
+                          AtivoFinanceiro **ativosFinanceiros,
+                          int *tamanhoArray,
+                          int *numAtivosFinanceiros) {
     FILE *file = fopen(nomeArquivo, "r");
     if (file == NULL) {
         printf("Erro ao abrir o arquivo.\n");
@@ -115,52 +166,79 @@ void lerAtivosFinanceiros(const char *nomeArquivo,
     }
 
     int i = 0;
-    while (fscanf(file, "%d,%c,%49[^\n]", &ativosFinanceiros[i].id,
-                  &ativosFinanceiros[i].tipo, ativosFinanceiros[i].nome) == 3) {
+    while (fscanf(file, "%d,%c,%49[^\n]", &(*ativosFinanceiros)[i].id,
+                  &(*ativosFinanceiros)[i].tipo, (*ativosFinanceiros)[i].nome) == 3) {
         i++;
-        if (i >= 10) {
-            printf("Tamanho máximo do array de ativos financeiros atingido.\n");
-            break;  // Interrompe a leitura se o array estiver cheio
+        (*numAtivosFinanceiros)++;
+
+        //Se o tamanho maximo foi atingido é realocado mais memoria
+        if (i >= *tamanhoArray) {
+            printf("----------------------------------------\n");
+            printf("Tamanho máximo atingido, a realocar memória...\n");
+            printf("----------------------------------------\n");
+
+            if (!realocaAtivosFinanceiros(ativosFinanceiros, tamanhoArray)) {
+                break;
+            }
         }
-        // if (i >= *tamanhoArray) {
-        //     *tamanhoArray += 10;  // Aumenta o tamanho do array em 10
-        //     *ativosFinanceiros = realloc(
-        //         *ativosFinanceiros, (*tamanhoArray) *
-        //         sizeof(AtivoFinanceiro));
-        //     printf('----------------------------------------');
-        //     printf("Tamanho máximo atingido, a realocar memória...\n");
-        //     printf('----------------------------------------');
-        //     if (*ativosFinanceiros == NULL) {
-        //         printf("Erro ao realocar memória.\n");
-        //         break;
-        //     }
-        // }
     }
-
     fclose(file);
+}
 
-    // Imprime os ativos financeiros lidos do arquivo
+void imprimirAtivosFinanceiros(AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros) {
     printf("Ativos Financeiros:\n");
-    for (int j = 0; j < i; j++) {
-        printf("ID: %d, Tipo: %c, Nome: %s\n", ativosFinanceiros[j].id,
-               ativosFinanceiros[j].tipo, ativosFinanceiros[j].nome);
-        //     printf("ID: %d, Tipo: %c, Nome: %s\n",
-        //     (*ativosFinanceiros)[j].id,
-        //    (*ativosFinanceiros)[j].tipo, (*ativosFinanceiros)[j].nome);
+    for (int j = 0; j < numAtivosFinanceiros; j++) {
+        printf("ID: %d, Tipo: %c, Nome: %s\n", ativosFinanceiros[j].id, ativosFinanceiros[j].tipo, ativosFinanceiros[j].nome);
     }
 }
 
-void atualizarValoresAtivos() {}
+
+void atualizarValoresAtivos(const char *nomeFicheiro, ValorAtivo **valoresAtivos, int *numValoresAtivos, int *maxValoresAtivos) {
+
+    FILE *file = fopen(nomeFicheiro, "r");
+
+    if (file == NULL) {
+        printf("Erro ao abrir o ficheiro.\n");
+        return;
+    }
+
+    int i = 0;
+    while (!feof(file)) {
+
+        if (*numValoresAtivos == *maxValoresAtivos)
+            if (!realocaValoresAtivos(valoresAtivos, maxValoresAtivos))
+                break;
+
+        fscanf(file, "%d-%d-%d %d %f", &(*valoresAtivos)[i].data.ano, &(*valoresAtivos)[i].data.mes, &(*valoresAtivos)[i].data.dia,
+               &(*valoresAtivos)[i].ativoFinanceiroId, &(*valoresAtivos)[i].valor);
+
+        (*numValoresAtivos)++;
+        i++;
+    }
+    fclose(file);
+}
+
+void imprimirValoresAtivos(ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    printf("Valores Ativos:\n");
+    for (int j = 0; j < numValoresAtivos; j++) {
+        printf("data: %d,%d,%d, id: %d, valor: %f\n", valoresAtivos[j].data.ano, valoresAtivos[j].data.mes, valoresAtivos[j].data.dia,
+               valoresAtivos[j].ativoFinanceiroId, valoresAtivos[j].valor);
+    }
+}
+
 
 int main() {
-    int opcao_principal, opcao_secundaria;
-    int numCarteiras, numAtivosCarteira = 0;
-    int numAtivosFinanceiros = 10;
+    int opcaoPrincipal, opcaoSecundaria;
+    int numCarteiras = 0;
+    int numAtivosFinanceiros = 0, maxAtivosFinanceiros = 10;
+    int numValoresAtivos = 0, maxValoresAtivos = 10;
+
     Carteira carteiras[MAX_CARTEIRAS];
-    AtivoCarteira ativosCarteiras[MAX_ATIVOS_CARTEIRA];
-    AtivoFinanceiro ativosFinanceiros[numAtivosFinanceiros];
-    // AtivoFinanceiro *ativosFinanceiros = malloc(10 *
-    // sizeof(AtivoFinanceiro));
+    AtivoFinanceiro *ativosFinanceiros;
+    ValorAtivo *valoresAtivos;
+
+    alocaAtivosFinanceiros(&ativosFinanceiros, &maxAtivosFinanceiros, maxAtivosFinanceiros);
+    alocaValoresAtivos(&valoresAtivos, &maxValoresAtivos, maxValoresAtivos);
 
     do {
         printf("Menu Principal:\n");
@@ -169,22 +247,20 @@ int main() {
         printf("3. Menu Secundário\n");
         printf("4. Sair\n");
         printf("Opção: ");
-        scanf("%d", &opcao_principal);
+        scanf("%d", &opcaoPrincipal);
 
-        switch (opcao_principal) {
+        switch (opcaoPrincipal) {
             case 1:
                 printf("Você selecionou a opção 1 do Menu Principal.\n");
-                lerDadosCarteiras(
-                    "data/"
-                    "carteiras.txt",
-                    carteiras, ativosCarteiras, &numCarteiras,
-                    &numAtivosCarteira);
+                lerDadosCarteiras("data/carteiras.txt", carteiras, &numCarteiras);
                 imprimirCarteiras(carteiras, numCarteiras);
                 break;
             case 2:
                 printf("Você selecionou a opção 2 do Menu Principal.\n");
-                lerAtivosFinanceiros("data/ativos.txt", &ativosFinanceiros,
-                                     &numAtivosFinanceiros);
+                lerAtivosFinanceiros("data/ativos.txt", &ativosFinanceiros, &maxAtivosFinanceiros, &numAtivosFinanceiros);
+                imprimirAtivosFinanceiros(ativosFinanceiros, numAtivosFinanceiros);
+                atualizarValoresAtivos("data/novosValoresAtivos.txt", &valoresAtivos, &numValoresAtivos, &maxValoresAtivos);
+                imprimirValoresAtivos(valoresAtivos, numValoresAtivos);
                 break;
             case 3:
                 do {
@@ -193,18 +269,14 @@ int main() {
                     printf("2. Opção B\n");
                     printf("3. Voltar\n");
                     printf("Opção: ");
-                    scanf("%d", &opcao_secundaria);
+                    scanf("%d", &opcaoSecundaria);
 
-                    switch (opcao_secundaria) {
+                    switch (opcaoSecundaria) {
                         case 1:
-                            printf(
-                                "Você selecionou a Opção A do Menu "
-                                "Secundário.\n");
+                            printf("Você selecionou a Opção A do Menu Secundário.\n");
                             break;
                         case 2:
-                            printf(
-                                "Você selecionou a Opção B do Menu "
-                                "Secundário.\n");
+                            printf("Você selecionou a Opção B do Menu Secundário.\n");
                             break;
                         case 3:
                             printf("Retornando ao Menu Principal...\n");
@@ -215,7 +287,7 @@ int main() {
                     }
 
                     printf("\n");
-                } while (opcao_secundaria != 3);
+                } while (opcaoSecundaria != 3);
 
                 break;
             case 4:
@@ -227,7 +299,8 @@ int main() {
         }
 
         printf("\n");
-    } while (opcao_principal != 4);
+    } while (opcaoPrincipal != 4);
 
     return 0;
 }
+
