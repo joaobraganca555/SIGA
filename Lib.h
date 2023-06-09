@@ -34,4 +34,4 @@ typedef struct {
     int numAtivosCarteira;
 } Carteira;
 
-#endif  // SIGA_MAURICIO_LIB_H
+#endif
