@@ -22,16 +22,16 @@ typedef struct {
 } AtivoFinanceiro;
 
 typedef struct {
-    int ativo_financeiro_id;
-    char data[11];
-    double valor;
+    int ativoFinanceiroId;
+    Data data;
+    float valor;
 } ValorAtivo;
 
 typedef struct {
     int id;
     char descricao[100];
     AtivoCarteira ativosCarteira[MAX_ATIVOS_CARTEIRA];
-    int num_ativo_carteira;
+    int numAtivosCarteira;
 } Carteira;
 
-#endif  // SIGA_MAURICIO_LIB_H
+#endif

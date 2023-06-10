@@ -1,12 +1,11 @@
 1,A,Tesla
 2,C,Bitcoin
 3,B,iShares iBoxx ETF
-4,D,Ethereum
-1,A,Tesla
-2,C,Bitcoin
-3,B,iShares iBoxx ETF
-4,D,Ethereum
-1,A,Tesla
-2,C,Bitcoin
-3,B,iShares iBoxx ETF
-4,D,Ethereum
+4,C,Ethereum
+6,E,Apple
+7,F,Microsoft
+8,C,BNB
+9,C,USTD
+10,C,DOGE
+11,C,SOL
+12,C,XMR
