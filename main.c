@@ -71,13 +71,11 @@ bool realocaAtivosFinanceiros(AtivoFinanceiro **ativosFinanceiro, int *maxAtivos
     }
 }
 
-
 void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCarteiras) {
     FILE *file;
     Carteira *tempCarteiras = carteiras;
 
     file = fopen(nomeArquivo, "r");
-
 
     if (file == NULL) {
         perror("Erro ao abrir o file");
@@ -102,6 +100,7 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCar
         // Carteira ID e Descrição
         if (linha[0] == 'C') {
             sscanf(linha, "CarteiraId %d", &tempCarteiras->id);
+            fgets(linha, sizeof(linha), file);
 
             //para não apanhar os possiveis caraters de fim de linha
             sscanf(linha, "%[^\n\r]", tempCarteiras->descricao);
@@ -265,7 +264,7 @@ void venderAtivo(Carteira *carteira, int idAtivoFinanceiro) {
 
     ativoCarteira->quantidade -= quantidade;
 
-    printf("Vendeu %d do ativo %d ficou com %d unidades", quantidade, ativoCarteira->id, ativoCarteira->quantidade);
+    printf("Vendeu %d do ativo %d ficou com %d unidades\n", quantidade, ativoCarteira->id, ativoCarteira->quantidade);
 }
 
 void comprarAtivo(Carteira *carteira, int idAtivoFinanceiro) {
@@ -287,13 +286,12 @@ void comprarAtivo(Carteira *carteira, int idAtivoFinanceiro) {
     if (ativoCarteira < 0) {
         carteira->ativosCarteira[carteira->numAtivosCarteira].quantidade = quantidade;
         carteira->ativosCarteira[carteira->numAtivosCarteira].id = idAtivoFinanceiro;
+        carteira->numAtivosCarteira++;
     } else {
         ativoCarteira->quantidade += quantidade;
     }
 
-    carteira->numAtivosCarteira++;
-
-    printf("Comprou %d unidades, agora possui %d to ativo %d", quantidade, ativoCarteira->quantidade, idAtivoFinanceiro);
+    printf("Comprou %d unidades, agora possui %d to ativo %d\n", quantidade, ativoCarteira->quantidade, idAtivoFinanceiro);
 }
 
 void listarAtivosCarteira(Carteira *carteira,
@@ -390,7 +388,7 @@ void listarCarteiras(Carteira *carteiras, int numCarteiras,
     do {
         printf("\nOpcao -> idCarteira - nomeCarteira\n");
         for (int i = 0; i < numCarteiras; ++i)
-            printf("%d. %d - %s", i + 1, carteiras[i].id, carteiras[i].descricao);
+            printf("%d. %d - %s\n", i + 1, carteiras[i].id, carteiras[i].descricao);
         printf("0. Cancelar\n");
 
         printf("Selecione a carteira: ");
@@ -583,10 +581,6 @@ int main() {
 //                imprimirValoresAtivos(valoresAtivos, numValoresAtivos);
                 break;
             case 3:
-                atualizarValoresAtivos("data/valores.txt", valoresAtivos,
-                                       &numAtivosFinanceiros);
-                break;
-            case 4:
                 do {
                     printf("\nMenu Secundário:\n");
                     printf("1. Listar Carteiras\n");
@@ -616,7 +610,6 @@ int main() {
 
                     printf("\n");
                 } while (opcaoSecundaria != 0);
-
                 break;
             case 0:
                 printf("Programa encerrado.\n");
