@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     int id;
-    char tipo;
+    char tipo[20];
     char nome[50];
 } AtivoFinanceiro;
 

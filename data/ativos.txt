@@ -5,7 +5,7 @@
 6,E,Apple
 7,F,Microsoft
 8,C,BNB
-9,C,USTD
+9,A,Toyota
 10,C,DOGE
 11,C,SOL
 12,C,XMR

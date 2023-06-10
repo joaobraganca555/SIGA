@@ -5,13 +5,6 @@
 
 #include "Lib.h"
 
-
-void cleanInputBuffer() {
-    char ch;
-
-    while ((ch = getchar()) != '\n' && ch != EOF);
-}
-
 int getIndexAtivoCarteiraById(int idAtivoFinanceiro, Carteira *carteira) {
     for (int i = 0; i < carteira->numAtivosCarteira; i++)
         if (carteira->ativosCarteira[i].id == idAtivoFinanceiro)
@@ -102,15 +95,16 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCar
 
         // Nova carteira, reinicializar variáveis
         if (linha[0] == '-') {
-            *tempCarteiras++;
+            tempCarteiras++;
             continue;
         }
 
         // Carteira ID e Descrição
         if (linha[0] == 'C') {
             sscanf(linha, "CarteiraId %d", &tempCarteiras->id);
-            fgets(tempCarteiras->descricao, sizeof(tempCarteiras->descricao),
-                  file);
+
+            //para não apanhar os possiveis caraters de fim de linha
+            sscanf(linha, "%[^\n\r]", tempCarteiras->descricao);
 
             tempCarteiras->numAtivosCarteira = 0;
             (*numCarteiras)++;
@@ -121,8 +115,7 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCar
         while (!feof(file)) {
             fgets(linha, sizeof(linha), file);
 
-            // se encontrar --- recua no ponteiro do ficheiro para a linha
-            // anterior
+            // se encontrar --- recua no ponteiro do ficheiro para a linha anterior porque significa que é uma nova carteira
             if (linha[0] == '-') {
                 fseek(file, (long long) -strlen(linha), SEEK_CUR);
                 break;
@@ -135,34 +128,45 @@ void lerDadosCarteiras(const char *nomeArquivo, Carteira *carteiras, int *numCar
 
             sscanf(linha, "Id de AtivoFinanceiro %d", &tempAtivosCarteira->id);
             fgets(linha, sizeof(linha), file);
-            sscanf(linha, "Quantidade de AtivoFinanceiro %d",
-                   &tempAtivosCarteira->quantidade);
+            sscanf(linha, "Quantidade de AtivoFinanceiro %d", &tempAtivosCarteira->quantidade);
 
             (tempCarteiras->numAtivosCarteira)++;
-            *tempAtivosCarteira++;
+            tempAtivosCarteira++;
         }
     }
     fclose(file);
 }
 
-void imprimirAtivosCarteira(Carteira *tempCarteiras) {
-    AtivoCarteira *tempAtivosCarteira = tempCarteiras->ativosCarteira;
-    printf("Ativos da carteira:\n");
-    for (int j = 0; j < tempCarteiras->numAtivosCarteira; j++, *tempAtivosCarteira++) {
-        printf("ID de AtivoFinanceiro: %d\n", tempAtivosCarteira->id);
-        printf("Quantidade de AtivoFinanceiro: %d\n", tempAtivosCarteira->quantidade);
+float getPrecoAtivoFinanceiro(int idAtivoFinanceiro, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    for (int i = 0; i < numValoresAtivos; ++i) {
+        if (valoresAtivos[i].ativoFinanceiroId == idAtivoFinanceiro) {
+            return valoresAtivos[i].valor;
+        }
     }
-    printf("\n");
+    return -1;
 }
 
-void imprimirCarteiras(Carteira *carteiras, int numCarteiras) {
-    Carteira *tempCarteiras = carteiras;
+void imprimirAtivosCarteira(Carteira carteira, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    printf("Ativos da carteira:\n");
+    float valorTotal = 0;
+    for (int j = 0; j < carteira.numAtivosCarteira; j++) {
+        printf("ID de AtivoFinanceiro: %d\n", carteira.ativosCarteira[j].id);
+        printf("Quantidade de AtivoFinanceiro: %d\n", carteira.ativosCarteira[j].quantidade);
+        valorTotal += getPrecoAtivoFinanceiro(carteira.ativosCarteira[j].id, valoresAtivos, numValoresAtivos);
+    }
+    printf("Valor total da carteira %.2f€\n", valorTotal);
+}
 
-    for (int i = 0; i < numCarteiras; i++, tempCarteiras++) {
-        printf("Carteira ID: %d\n", tempCarteiras->id);
-        printf("Descrição: %s\n", tempCarteiras->descricao);
+void imprimirCarteira(Carteira carteira, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    printf("Carteira ID: %d\n", carteira.id);
+    printf("Descrição: %s\n", carteira.descricao);
 
-        imprimirAtivosCarteira(tempCarteiras);
+    imprimirAtivosCarteira(carteira, valoresAtivos, numValoresAtivos);
+}
+
+void imprimirCarteiras(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    for (int i = 0; i < numCarteiras; i++) {
+        imprimirCarteira(carteiras[i], valoresAtivos, numValoresAtivos);
     }
 }
 
@@ -177,10 +181,13 @@ void lerAtivosFinanceiros(const char *nomeArquivo,
     }
 
     int i = 0;
-    while (fscanf(file, "%d,%c,%49[^\n]", &(*ativosFinanceiros)[i].id,
-                  &(*ativosFinanceiros)[i].tipo, (*ativosFinanceiros)[i].nome) == 3) {
+    while (fscanf(file, "%d,%[^,],%49[^\n\r]",
+                  &(*ativosFinanceiros)[i].id, (*ativosFinanceiros)[i].tipo, (*ativosFinanceiros)[i].nome) == 3) {
         i++;
         (*numAtivosFinanceiros)++;
+
+        //remover o caracter de fim de linha
+        (*ativosFinanceiros)[i].nome[strcspn((*ativosFinanceiros)[i].nome, "\r")] = '\0';
 
         //Se o tamanho maximo foi atingido é realocado mais memoria
         if (i >= *tamanhoArray) {
@@ -233,14 +240,6 @@ void imprimirValoresAtivos(ValorAtivo *valoresAtivos, int numValoresAtivos) {
     }
 }
 
-float getPrecoAtivoFinanceiro(int idAtivoFinanceiro, ValorAtivo *valoresAtivos, int numValoresAtivos) {
-    for (int i = 0; i < numValoresAtivos; ++i) {
-        if (valoresAtivos[i].ativoFinanceiroId == idAtivoFinanceiro) {
-            return valoresAtivos[i].valor;
-        }
-    }
-    return -1;
-}
 
 void venderAtivo(Carteira *carteira, int idAtivoFinanceiro) {
 
@@ -308,12 +307,10 @@ void listarAtivosCarteira(Carteira *carteira,
     }
 
     do {
-        printf("\n");
+        printf("\nOpcao. nomeAtivo quantidadeEmCarteira\n");
         for (int i = 0; i < carteira->numAtivosCarteira; ++i) {
             int indexAtivoFinanceiro = getIndexAtivoFinanceiroById(carteira->ativosCarteira[i].id, ativosFinanceiros, numAtivosFinanceiros);
-            int i1 = i + 1;
-//            printf("%d. %s, %d\n", i1, ativosFinanceiros[indexAtivoFinanceiro].nome, carteira->ativosCarteira[i].quantidade);
-            printf("%d. %d, %d\n", i + 1, ativosFinanceiros[indexAtivoFinanceiro].id, carteira->ativosCarteira[i].quantidade);
+            printf("%d. %s, %d\n", i + 1, ativosFinanceiros[indexAtivoFinanceiro].nome, carteira->ativosCarteira[i].quantidade);
         }
         printf("0. Cancelar\n");
 
@@ -363,14 +360,16 @@ void comprarAtivosListaTodos(Carteira *carteira,
         printf("\nAtivos Financeiros disponiveis:\n");
         for (int i = 0; i < numAtivosFinanceiros; ++i) {
             float valor = getPrecoAtivoFinanceiro(ativosFinanceiros[i].id, valoresAtivo, numValoresAtivo);
-            printf("%d. %.2f€\n", i + 1, valor);
-//            printf("%d. %s %.2f €\n", i + 1, ativosFinanceiros[i].nome, valor);
+            printf("%d. %s %.2f€\n", i + 1, ativosFinanceiros[i].nome, valor);
         }
 
         printf("0. Cancelar\n");
 
         printf("Selecione o ativo: ");
         scanf("%d", &opcaoAtivo);
+
+        if (opcaoAtivo == 0)
+            break;
 
         comprarAtivo(carteira, ativosFinanceiros[opcaoAtivo - 1].id);
     } while (opcaoAtivo != 0);
@@ -422,6 +421,130 @@ void listarCarteiras(Carteira *carteiras, int numCarteiras,
     } while (opcaoCarteira != 0);
 }
 
+void mediaValorAtivoFinanceiroPorTipo(AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros,
+                                      ValorAtivo *valoresAtivos, int numValoresAtivos) {
+
+    typedef struct {
+        char tipo[20];
+        float sum;
+        int count;
+    } MediaContagem;
+
+    MediaContagem tipos[numAtivosFinanceiros];
+    int numMediaContagem = 0;
+
+    for (int i = 0; i < numAtivosFinanceiros; i++) {
+        const char *tipo = ativosFinanceiros[i].tipo;
+        float valor = getPrecoAtivoFinanceiro(ativosFinanceiros[i].id, valoresAtivos, numValoresAtivos);
+
+        int existe = 0;
+        for (int j = 0; j < numMediaContagem; j++) {
+            if (strcmp(tipos[j].tipo, tipo) == 0) {
+                tipos[j].sum += valor;
+                tipos[j].count++;
+                existe = 1;
+                break;
+            }
+        }
+
+        if (!existe) {
+            strcpy(tipos[numMediaContagem].tipo, tipo);
+            tipos[numMediaContagem].sum = valor;
+            tipos[numMediaContagem].count = 1;
+            numMediaContagem++;
+        }
+    }
+
+    printf("\nMedia valor Ativo Financeiro por tipo:\n");
+    for (int i = 0; i < numMediaContagem; i++) {
+        float media = tipos[i].sum / (float) tipos[i].count;
+        printf("Tipo: %s, valor médio: %.2f€\n", tipos[i].tipo, media);
+    }
+}
+
+void top5AtivosFinanceiros(AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+
+    //Criar array com os indices do ativos financeiros para não trocar a ordem original
+    int indices[numAtivosFinanceiros];
+    for (int i = 0; i < numAtivosFinanceiros; i++)
+        indices[i] = i;
+
+    for (int i = 0; i < numAtivosFinanceiros - 1; i++) {
+        for (int j = 0; j < numAtivosFinanceiros - i - 1; j++) {
+            float valor1 = getPrecoAtivoFinanceiro(ativosFinanceiros[indices[j]].id, valoresAtivos, numValoresAtivos);
+            float valor2 = getPrecoAtivoFinanceiro(ativosFinanceiros[indices[j + 1]].id, valoresAtivos, numValoresAtivos);
+
+            if (valor1 < valor2) {
+                int temp = indices[j];
+                indices[j] = indices[j + 1];
+                indices[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nTop 5 Ativos Financeiros com maior valor:\n");
+    for (int i = 0; i < 5 && i < numAtivosFinanceiros; i++) {
+        int indiceAtivo = indices[i];
+        AtivoFinanceiro *ativo = &ativosFinanceiros[indiceAtivo];
+        float valor = getPrecoAtivoFinanceiro(ativo->id, valoresAtivos, numValoresAtivos);
+
+        printf("%d. Valor: %.2f, %d, %s\n", i + 1, valor, ativo->id, ativo->nome);
+    }
+}
+
+void menuEstatisticas(AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros, ValorAtivo *valoresAtivos,
+                      int numValoresAtivo) {
+
+    int opcao;
+
+    do {
+        printf("\n1. Top 5 Ativos Financeiros com maior valor\n");
+        printf("2. Média do valor de Ativo Financeiro por tipo\n");
+        printf("0. Cancelar\n");
+        printf("Opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                top5AtivosFinanceiros(ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numValoresAtivo);
+                break;
+            case 2:
+                mediaValorAtivoFinanceiroPorTipo(ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numValoresAtivo);
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+                break;
+        }
+
+    } while (opcao != 0);
+}
+
+void menuRelatorios(Carteira *carteiras, int numCarteiras,
+                    AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros,
+                    ValorAtivo *valoresAtivos, int numValoresAtivos) {
+
+    int opcaoCarteira;
+    if (numCarteiras == 0) {
+        printf("Não possuir carteiras\n");
+        return;
+    }
+
+    do {
+        printf("\nOpcao -> idCarteira - nomeCarteira\n");
+        for (int i = 0; i < numCarteiras; ++i)
+            printf("%d. %d - %s", i + 1, carteiras[i].id, carteiras[i].descricao);
+        printf("0. Cancelar\n");
+
+        printf("Selecione a carteira: ");
+        scanf("%d", &opcaoCarteira);
+
+        imprimirCarteira(carteiras[opcaoCarteira - 1], valoresAtivos, numValoresAtivos);
+
+    } while (opcaoCarteira != 0);
+}
+
 int main() {
     int opcaoPrincipal, opcaoSecundaria;
     int numCarteiras = 0;
@@ -467,7 +590,8 @@ int main() {
                 do {
                     printf("\nMenu Secundário:\n");
                     printf("1. Listar Carteiras\n");
-                    printf("2. Opção B\n");
+                    printf("2. Estatisticas\n");
+                    printf("3. Relatorios\n");
                     printf("0. Voltar\n");
                     printf("Opção: ");
                     scanf("%d", &opcaoSecundaria);
@@ -477,9 +601,10 @@ int main() {
                             listarCarteiras(carteiras, numCarteiras, ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numAtivosFinanceiros);
                             break;
                         case 2:
-                            printf("Você selecionou a Opção B do Menu Secundário.\n");
+                            menuEstatisticas(ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numAtivosFinanceiros);
                             break;
                         case 3:
+                            menuRelatorios(carteiras, numCarteiras, ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numAtivosFinanceiros);
                             printf("Retornando ao Menu Principal...\n");
                             break;
                         case 0:
