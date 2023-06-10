@@ -23,7 +23,7 @@ typedef struct {
 
 typedef struct {
     int ativo_financeiro_id;
-    Data data;
+    char data[11];
     double valor;
 } ValorAtivo;
 
