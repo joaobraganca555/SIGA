@@ -179,7 +179,8 @@ void menuEstatisticas(AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceir
     } while (opcao != 0);
 }
 
-void menuRelatorios(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos) {
+void menuRelatorios(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos,
+                    AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros) {
 
     int opcaoCarteira;
     if (numCarteiras == 0) {
@@ -196,13 +197,13 @@ void menuRelatorios(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAt
         printf("Selecione a carteira: ");
         scanf("%d", &opcaoCarteira);
 
-        imprimirCarteira(carteiras, valoresAtivos, numValoresAtivos);
+        imprimirCarteira(carteiras, valoresAtivos, numValoresAtivos, ativosFinanceiros, numAtivosFinanceiros);
 
     } while (opcaoCarteira != 0);
 }
 
-void menuSecondario(int numCarteiras, int numAtivosFinanceiros, Carteira *carteiras, AtivoFinanceiro *ativosFinanceiros,
-                    ValorAtivo *valoresAtivos) {
+void menuSecondario(Carteira *carteiras, int numCarteiras, AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros,
+                    ValorAtivo *valoresAtivos, int numValoresAtivos) {
 
     int opcao;
 
@@ -217,13 +218,13 @@ void menuSecondario(int numCarteiras, int numAtivosFinanceiros, Carteira *cartei
 
         switch (opcao) {
             case 1:
-                menuCarteiras(carteiras, numCarteiras, ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numAtivosFinanceiros);
+                menuCarteiras(carteiras, numCarteiras, ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numValoresAtivos);
                 break;
             case 2:
-                menuEstatisticas(ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numAtivosFinanceiros);
+                menuEstatisticas(ativosFinanceiros, numAtivosFinanceiros, valoresAtivos, numValoresAtivos);
                 break;
             case 3:
-                menuRelatorios(carteiras, numCarteiras, valoresAtivos, numAtivosFinanceiros);
+                menuRelatorios(carteiras, numCarteiras, valoresAtivos, numValoresAtivos, ativosFinanceiros, numAtivosFinanceiros);
                 break;
             case 0:
                 break;
@@ -252,18 +253,15 @@ void menuPrincipal(Carteira *carteiras, int *numCarteiras, AtivoFinanceiro **ati
         switch (opcao) {
             case 1:
                 lerDadosCarteiras("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/carteiras.txt", carteiras, numCarteiras);
-//                imprimirCarteiras(carteiras, numCarteiras);
                 break;
             case 2:
-                lerAtivosFinanceiros("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/ativos.txt", ativosFinanceiros, maxAtivosFinanceiros,
-                                     numAtivosFinanceiros);
-//                imprimirAtivosFinanceiros(ativosFinanceiros, numAtivosFinanceiros);
-                atualizarValoresAtivos("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/novosValoresAtivos.txt", valoresAtivos,
-                                       numValoresAtivos, maxValoresAtivos);
-//                imprimirValoresAtivos(valoresAtivos, numValoresAtivos);
+                lerAtivosFinanceiros("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/ativos.txt",
+                                     ativosFinanceiros, maxAtivosFinanceiros, numAtivosFinanceiros);
+                atualizarValoresAtivos("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/novosValoresAtivos.txt",
+                                       valoresAtivos, numValoresAtivos, maxValoresAtivos);
                 break;
             case 3:
-                menuSecondario((*numCarteiras), (*numAtivosFinanceiros), carteiras, (*ativosFinanceiros), (*valoresAtivos));
+                menuSecondario(carteiras, *numCarteiras, *ativosFinanceiros, *numAtivosFinanceiros, *valoresAtivos, *numValoresAtivos);
                 break;
             case 0:
                 printf("Programa encerrado.\n");

@@ -4,20 +4,27 @@
 #include "Lib.h"
 
 /**
+ *
  * Imprime os ativos que estao associados a uma determinada carteira
  * @param carteira ponteiro para a carteira a imprimir
+ * @param ativosFinanceiros ponteiro os ativos financeiros
+ * @param numAtivosFinanceiros quantidade de ativos financeiros que existe
  * @param valoresAtivos ponteiro para os valores dos ativos
  * @param numValoresAtivos quantidade que existe de valores de ativos
  */
-void imprimirAtivosCarteira(Carteira *carteira, ValorAtivo *valoresAtivos, int numValoresAtivos);
+void imprimirAtivosCarteira(Carteira *carteira, AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros,
+                            ValorAtivo *valoresAtivos, int numValoresAtivos);
 
 /**
  * Imprimir toda informação de uma carteira
  * @param carteira ponteiro para a carteira a imprimir
  * @param valoresAtivos ponteiro para os valores dos ativos
  * @param numValoresAtivos quantidade que existe de valores de ativos
+ * @param ativosFinanceiros ponteiro os ativos financeiros
+ * @param numAtivosFinanceiros quantidade de ativos financeiros que existe
  */
-void imprimirCarteira(Carteira *carteira, ValorAtivo *valoresAtivos, int numValoresAtivos);
+void
+imprimirCarteira(Carteira *carteira, ValorAtivo *valoresAtivos, int numValoresAtivos, AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros);
 
 /**
  * Imprime toda a informação de todas as carteiras
@@ -25,8 +32,11 @@ void imprimirCarteira(Carteira *carteira, ValorAtivo *valoresAtivos, int numValo
  * @param numCarteiras quantidade de carteira que existe
  * @param valoresAtivos ponteiro para os valores dos ativos
  * @param numValoresAtivos quantidade que existe de valores de ativos
+ * @param ativosFinanceiros ponteiro os ativos financeiros
+ * @param numAtivosFinanceiros quantidade de ativos financeiros que existe
  */
-void imprimirCarteiras(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos);
+void imprimirCarteiras(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos,
+                       AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros);
 
 /**
  * Imprimir toda informação dos ativos financeiros
