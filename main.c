@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "Lib.h"
 #include "ficheiros.h"
@@ -237,7 +238,7 @@ void menuSecondario(Carteira *carteiras, int numCarteiras, AtivoFinanceiro *ativ
     } while (opcao != 0);
 }
 
-void menuPrincipal(Carteira *carteiras, int *numCarteiras, AtivoFinanceiro **ativosFinanceiros, int *numAtivosFinanceiros, int *maxAtivosFinanceiros,
+void menuPrincipal(Carteira carteiras[MAX_CARTEIRAS], int *numCarteiras, AtivoFinanceiro **ativosFinanceiros, int *numAtivosFinanceiros, int *maxAtivosFinanceiros,
                    ValorAtivo **valoresAtivos, int *numValoresAtivos, int *maxValoresAtivos) {
 
     int opcao;
@@ -263,6 +264,16 @@ void menuPrincipal(Carteira *carteiras, int *numCarteiras, AtivoFinanceiro **ati
             case 3:
                 menuSecondario(carteiras, *numCarteiras, *ativosFinanceiros, *numAtivosFinanceiros, *valoresAtivos, *numValoresAtivos);
                 break;
+            case 4:
+                exportarValoresAtivos(*valoresAtivos, *numValoresAtivos);
+                exportarCarteiras(carteiras, *numCarteiras);
+                break;
+            case 5:
+                importarValoresAtivos(valoresAtivos, numValoresAtivos, maxValoresAtivos);
+                imprimirValoresAtivos(*valoresAtivos, *numValoresAtivos);
+                importarCarteiras(carteiras, numCarteiras);
+                imprimirCarteiras(carteiras, *numCarteiras, *valoresAtivos, *numValoresAtivos, *ativosFinanceiros, *numAtivosFinanceiros);
+                break;
             case 0:
                 printf("Programa encerrado.\n");
                 break;
@@ -277,19 +288,21 @@ void menuPrincipal(Carteira *carteiras, int *numCarteiras, AtivoFinanceiro **ati
 
 int main() {
     int numCarteiras = 0;
-    int numAtivosFinanceiros = 0, maxAtivosFinanceiros = 0;
-    int numValoresAtivos = 0, maxValoresAtivos = 0;
+    int numAtivosFinanceiros = 0, maxAtivosFinanceiros = 10;
+    int numValoresAtivos = 0, maxValoresAtivos = 10;
 
     Carteira carteiras[MAX_CARTEIRAS];
     AtivoFinanceiro *ativosFinanceiros;
     ValorAtivo *valoresAtivos;
 
-    alocaAtivosFinanceiros(&ativosFinanceiros, &maxAtivosFinanceiros, 10);
-    alocaValoresAtivos(&valoresAtivos, &maxValoresAtivos, 10);
+    alocaAtivosFinanceiros(&ativosFinanceiros, &maxAtivosFinanceiros);
+    alocaValoresAtivos(&valoresAtivos, &maxValoresAtivos);
 
     menuPrincipal(carteiras, &numCarteiras, &ativosFinanceiros, &numAtivosFinanceiros, &maxAtivosFinanceiros,
                   &valoresAtivos, &numValoresAtivos, &maxValoresAtivos);
 
+    free(ativosFinanceiros);
+    free(valoresAtivos);
     return 0;
 }
 

@@ -10,7 +10,8 @@ void imprimirAtivosCarteira(Carteira *carteira, AtivoFinanceiro *ativosFinanceir
     float valorTotal = 0;
     for (int j = 0; j < carteira->numAtivosCarteira; j++) {
         AtivoFinanceiro *ativoFinanceiro = getAtivoFinanceiroPorId(carteira->ativosCarteira[j].id, ativosFinanceiros, numAtivosFinanceiros);
-        valorTotal += getPrecoAtivoFinanceiro(carteira->ativosCarteira[j].id, valoresAtivos, numValoresAtivos);
+        valorTotal += (getPrecoAtivoFinanceiro(carteira->ativosCarteira[j].id, valoresAtivos, numValoresAtivos) *
+                       (float) carteira->ativosCarteira[j].quantidade);
         printf("\tid: %d, quantidade: %d, nome: %s\n", carteira->ativosCarteira[j].id, carteira->ativosCarteira[j].quantidade, ativoFinanceiro->nome);
     }
     printf("Valor total da carteira %.2f€\n", valorTotal);
@@ -25,7 +26,7 @@ void imprimirCarteira(Carteira *carteira, ValorAtivo *valoresAtivos, int numValo
 void imprimirCarteiras(Carteira *carteiras, int numCarteiras, ValorAtivo *valoresAtivos, int numValoresAtivos,
                        AtivoFinanceiro *ativosFinanceiros, int numAtivosFinanceiros) {
     for (int i = 0; i < numCarteiras; i++) {
-        imprimirCarteira(carteiras, valoresAtivos, numValoresAtivos, ativosFinanceiros, numAtivosFinanceiros);
+        imprimirCarteira(&carteiras[i], valoresAtivos, numValoresAtivos, ativosFinanceiros, numAtivosFinanceiros);
     }
 }
 
@@ -39,7 +40,7 @@ void imprimirAtivosFinanceiros(AtivoFinanceiro *ativosFinanceiros, int numAtivos
 void imprimirValoresAtivos(ValorAtivo *valoresAtivos, int numValoresAtivos) {
     printf("Valores Ativos:\n");
     for (int j = 0; j < numValoresAtivos; j++) {
-        printf("data: %d,%d,%d, id: %d, valor: %f\n",
+        printf("data: %d-%d-%d, id: %d, valor: %f\n",
                valoresAtivos[j].data.tm_year + 1900, valoresAtivos[j].data.tm_mon + 1,
                valoresAtivos[j].data.tm_mday, valoresAtivos[j].ativoFinanceiroId, valoresAtivos[j].valor);
     }

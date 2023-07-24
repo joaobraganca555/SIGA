@@ -6,13 +6,12 @@
 #include "string.h"
 #include "Lib.h"
 
-bool alocaValoresAtivos(ValorAtivo **valoresAtivos, int *maxValoresAtivos, int tam) {
-    *valoresAtivos = (ValorAtivo *) malloc(tam * sizeof(ValorAtivo));
+bool alocaValoresAtivos(ValorAtivo **valoresAtivos, int *maxValoresAtivos) {
+    *valoresAtivos = (ValorAtivo *) malloc(*maxValoresAtivos * sizeof(ValorAtivo));
     if (*valoresAtivos == NULL) {
         printf("Erro ao alocar memoria para valores ativos\n");
         return false;
     } else {
-        *maxValoresAtivos = tam;
         return true;
     }
 }
@@ -31,14 +30,13 @@ bool realocaValoresAtivos(ValorAtivo **valoresAtivos, int *maxValoresAtivos) {
     }
 }
 
-bool alocaAtivosFinanceiros(AtivoFinanceiro **ativosFinanceiros, int *maxAtivosFinanceiros, int tam) {
+bool alocaAtivosFinanceiros(AtivoFinanceiro **ativosFinanceiros, int *maxAtivosFinanceiros) {
 
-    *ativosFinanceiros = (AtivoFinanceiro *) malloc(tam * sizeof(AtivoFinanceiro));
+    *ativosFinanceiros = (AtivoFinanceiro *) malloc(*maxAtivosFinanceiros * sizeof(AtivoFinanceiro));
     if (*ativosFinanceiros == NULL) {
         printf("Erro ao alocar memoria para Ativos Financeiros\n");
         return false;
     } else {
-        *maxAtivosFinanceiros = tam;
         return true;
     }
 }
@@ -175,6 +173,83 @@ void atualizarValoresAtivos(char *nomeFicheiro, ValorAtivo **valoresAtivos, int 
     }
     fclose(file);
 }
+
+void importarValoresAtivos(ValorAtivo **valoresAtivos, int *numValoresAtivos, int *maxValoresAtivos) {
+
+    int aux;
+    FILE *file = fopen("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/valoresAtivos.bin", "r");
+
+    if (file == NULL) {
+        printf("Erro na leitura do ficheiro valoresAtivos!\n");
+    } else {
+        fread(numValoresAtivos, sizeof(int), 1, file);
+        maxValoresAtivos = numValoresAtivos;
+
+        if (alocaValoresAtivos(valoresAtivos, maxValoresAtivos)) {
+            aux = (int) fread(*valoresAtivos, sizeof(ValorAtivo), *numValoresAtivos, file);
+            if (aux != *numValoresAtivos) {
+                *numValoresAtivos = 0;
+                *maxValoresAtivos = 0;
+                free(valoresAtivos);
+                valoresAtivos = NULL;
+            } else {
+                printf("Ficheiro clientes lido com sucesso!\n");
+            }
+        }
+    }
+    fclose(file);
+}
+
+void exportarValoresAtivos(ValorAtivo *valoresAtivos, int numValoresAtivos) {
+    FILE *file = fopen("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/valoresAtivos.bin", "w");
+    if (file == NULL)
+        printf("Erro ao abrir ficheiro valoresAtivos!\n");
+    else {
+        fwrite(&numValoresAtivos, sizeof(int), 1, file);
+        fwrite(valoresAtivos, sizeof(ValorAtivo), numValoresAtivos, file);
+        fclose(file);
+        printf("Carteiras gravadas com sucesso!\n");
+    }
+}
+
+void importarCarteiras(Carteira *carteiras, int *numCarteiras) {
+
+    FILE *file = fopen("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/carteiras.bin", "r");
+
+    if (file == NULL) {
+        printf("Erro na leitura do ficheiro carteiras!\n");
+    } else {
+        fread(numCarteiras, sizeof(int), 1, file);
+
+        for (int i = 0; i < *numCarteiras; ++i) {
+            fread(&(carteiras[i]), sizeof(Carteira), 1, file);
+            fread(&(carteiras[i].numAtivosCarteira), sizeof(int), 1, file);
+            fread(&(carteiras[i].ativosCarteira), sizeof(AtivoCarteira), carteiras[i].numAtivosCarteira, file);
+        }
+        printf("Ficheiro carteiras lido com sucesso!\n");
+    }
+    fclose(file);
+}
+
+void exportarCarteiras(Carteira *carteiras, int numCarteiras) {
+    FILE *file = fopen("/Users/micaelmbp/Documents/Projects/C/SIGA_Mauricio/data/carteiras.bin", "w");
+    if (file == NULL)
+        printf("Erro ao abrir ficheiro carteiras!\n");
+    else {
+        fwrite(&numCarteiras, sizeof(int), 1, file);
+        for (int i = 0; i < numCarteiras; ++i) {
+            fwrite(&carteiras[i], sizeof(Carteira), 1, file);
+            fwrite(&carteiras[i].numAtivosCarteira, sizeof(int), 1, file);
+            fwrite(&carteiras[i].ativosCarteira, sizeof(AtivoCarteira), carteiras->numAtivosCarteira, file);
+        }
+        fclose(file);
+        printf("Valores de ativos gravados com sucesso!\n");
+    }
+}
+
+
+
+
 
 
 
